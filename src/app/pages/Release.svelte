@@ -156,6 +156,17 @@
                             varColor="--background-color"
                         />
                     </LeftReleaseBaseButton>
+                    <LeftReleaseBaseButton
+                        text="Смотреть с другом"
+                        onClickCallback={() => {
+                            window.updateViewportComponent(15, {
+                                isHost: true,
+                                release: args.release
+                            });
+                        }}
+                        btnType="soon"
+                    >
+                    </LeftReleaseBaseButton>
                 {/if}
                 <LeftReleaseBaseButton
                     bookmarkType={r.release.profile_list_status ?? 0}

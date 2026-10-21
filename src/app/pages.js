@@ -18,4 +18,5 @@ export const Pages = Object.freeze({
     COLLECTION:      12,
     OFFLINE:         13,
     OFFLINE_RELEASE: 14,
+    ROOM:            15,
 });

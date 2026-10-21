@@ -14,6 +14,13 @@
     });
 
     let updateInfo = false;
+    let joinRoomId = "";
+
+    function joinRoom() {
+        if (joinRoomId) {
+            window.updateViewportComponent(15, { isHost: false, roomId: joinRoomId });
+        }
+    }
 
     async function getMainPage() {
         try {
@@ -117,6 +124,12 @@
         onclick={() => setReleasesType(4)}>Фильмы</button
     >
 </div>
+
+<div class="p2p-join flex-row" style="margin: 0px 40px 20px 40px; gap: 10px;">
+    <input type="text" bind:value={joinRoomId} placeholder="ID комнаты для совместного просмотра" style="padding: 10px; border-radius: 5px; border: none; flex-grow: 1; background: rgba(255,255,255,0.1); color: white;" />
+    <button style="padding: 10px 20px; border-radius: 5px; border: none; background: #3a3a4c; color: white; cursor: pointer;" onclick={joinRoom}>Присоединиться</button>
+</div>
+
 <div class="releases-container flex-column">
     {#await firstData}
         <Preloader />

@@ -1,0 +1,45 @@
+<<<<<<< SEARCH
+                {:else}
+                    <LeftReleaseBaseButton
+                        text="Воспроизвести"
+                        onClickCallback={() => (showSelectEpisodeModal = true)}
+                        btnType="play"
+                    >
+                        <Icon
+                            src={PlayIcon}
+                            size={{ width: 28, height: 28 }}
+                            varColor="--background-color"
+                        />
+                    </LeftReleaseBaseButton>
+                {/if}
+=======
+                {:else}
+                    <LeftReleaseBaseButton
+                        text="Воспроизвести"
+                        onClickCallback={() => (showSelectEpisodeModal = true)}
+                        btnType="play"
+                    >
+                        <Icon
+                            src={PlayIcon}
+                            size={{ width: 28, height: 28 }}
+                            varColor="--background-color"
+                        />
+                    </LeftReleaseBaseButton>
+                    <LeftReleaseBaseButton
+                        text="Совместный просмотр"
+                        onClickCallback={() => {
+                            window.updateViewportComponent(15, {
+                                isHost: true,
+                                release: args.release
+                            });
+                        }}
+                        btnType="p2p"
+                    >
+                        <Icon
+                            src={PlayIcon}
+                            size={{ width: 28, height: 28 }}
+                            varColor="--background-color"
+                        />
+                    </LeftReleaseBaseButton>
+                {/if}
+>>>>>>> REPLACE

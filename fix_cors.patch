@@ -1,0 +1,17 @@
+<<<<<<< SEARCH
+      if (!isKodikDomain(host) && host !== "video.sibnet.ru") {
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua-platform', "Android");
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua-mobile', "?1");
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua', "AnixartApp");
+        UpsertKeyValue(requestHeaders, 'User-Agent', UserAgent);
+      }
+      callback({ requestHeaders });
+=======
+      if (!isKodikDomain(host) && host !== "video.sibnet.ru" && !host.includes("peerjs")) {
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua-platform', "Android");
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua-mobile', "?1");
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua', "AnixartApp");
+        UpsertKeyValue(requestHeaders, 'User-Agent', UserAgent);
+      }
+      callback({ requestHeaders });
+>>>>>>> REPLACE

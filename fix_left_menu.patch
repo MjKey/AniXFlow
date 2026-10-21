@@ -1,0 +1,43 @@
+<<<<<<< SEARCH
+    import DownloadIcon from "../../icons/download.svg";
+
+    export const views = [
+        Home,
+        Bookmarks,
+        Friends,
+        CollectionList,
+        Discover,
+        Search,
+        NotAvailable,
+        Settings,
+        Release,
+        Profile,
+        Login,
+        Player,
+        Collection,
+        Offline,
+        OfflineRelease
+    ];
+=======
+    import DownloadIcon from "../../icons/download.svg";
+    import Room from "../../pages/Room.svelte";
+
+    export const views = [
+        Home,
+        Bookmarks,
+        Friends,
+        CollectionList,
+        Discover,
+        Search,
+        NotAvailable,
+        Settings,
+        Release,
+        Profile,
+        Login,
+        Player,
+        Collection,
+        Offline,
+        OfflineRelease,
+        Room
+    ];
+>>>>>>> REPLACE

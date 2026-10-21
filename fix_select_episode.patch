@@ -1,0 +1,21 @@
+<<<<<<< SEARCH
+                            updateViewportComponent(Pages.PLAYER, {
+                                release: args.release,
+                                episodes: episodes,
+                                currentEpisode: ep,
+                            });
+=======
+                            if (window.p2pConnection && window.p2pIsHost) {
+                                window.p2pConnection.send({
+                                    type: 'sync_start',
+                                    release: args.release,
+                                    episodes: episodes,
+                                    episode: ep
+                                });
+                            }
+                            updateViewportComponent(Pages.PLAYER, {
+                                release: args.release,
+                                episodes: episodes,
+                                currentEpisode: ep,
+                            });
+>>>>>>> REPLACE

@@ -31,6 +31,7 @@
     import Offline from "../../pages/Offline.svelte";
     import OfflineRelease from "../../pages/OfflineRelease.svelte";
     import DownloadIcon from "../../icons/download.svg";
+    import Room from "../../pages/Room.svelte";
 
     export const views = [
         Home,
@@ -47,7 +48,8 @@
         Player,
         Collection,
         Offline,
-        OfflineRelease
+        OfflineRelease,
+        Room
     ];
 
     export let viewportComponent = null;

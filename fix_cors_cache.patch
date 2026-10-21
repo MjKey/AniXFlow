@@ -1,0 +1,16 @@
+<<<<<<< SEARCH
+      promise.finally(() => cacheInFlight.delete(filePath));
+      cacheInFlight.set(filePath, promise);
+    }
+
+    const buffer = await promise;
+=======
+      promise.finally(() => cacheInFlight.delete(filePath));
+      cacheInFlight.set(filePath, promise);
+    }
+
+    let buffer = null;
+    try {
+        buffer = await promise;
+    } catch (e) {}
+>>>>>>> REPLACE
