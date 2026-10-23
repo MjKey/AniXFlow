@@ -114,70 +114,64 @@ async function handleAnixflowCacheRequest(req) {
     const normalizedPath = filePath.replace(/\\/g, '/');
 
     if (fs.existsSync(filePath)) {
-      if (typeof net !== 'undefined' && net.fetch) {
-        return net.fetch(`file:///${normalizedPath}`);
-      } else {
+      try {
         const fileData = await fs.promises.readFile(filePath);
         return new Response(fileData, { headers: { 'Content-Type': 'image/jpeg' } });
+      } catch (e) {
+        console.error("Failed to read image cache file:", e);
       }
-    } else {
-      if (!cacheInFlight.has(filePath)) {
-        const isBlocked = isBlockedImageDomain(originalUrl);
-        const proxyUrl = getProxyImageUrl(originalUrl);
-
-        const bufferPromise = (async () => {
-          try {
-            let response = null;
-            if (isBlocked) {
-              if (typeof net !== 'undefined' && net.fetch) {
-                response = await net.fetch(proxyUrl, {
-                  headers: { 'User-Agent': UserAgent, 'Referer': 'https://anixart.tv/' }
-                });
-              } else if (typeof fetch !== 'undefined') {
-                response = await fetch(proxyUrl, {
-                  headers: { 'User-Agent': UserAgent, 'Referer': 'https://anixart.tv/' }
-                });
-              }
-            } else {
-              try {
-                const fetchFn = (typeof net !== 'undefined' && net.fetch) ? net.fetch : fetch;
-                response = await fetchFn(originalUrl, {
-                  headers: { 'User-Agent': UserAgent, 'Referer': 'https://anixart.tv/' }
-                });
-                if (!response || !response.ok) {
-                  response = await fetchFn(proxyUrl, {
-                    headers: { 'User-Agent': UserAgent, 'Referer': 'https://anixart.tv/' }
-                  });
-                }
-              } catch (e) {
-                const fetchFn = (typeof net !== 'undefined' && net.fetch) ? net.fetch : fetch;
-                response = await fetchFn(proxyUrl, {
-                  headers: { 'User-Agent': UserAgent, 'Referer': 'https://anixart.tv/' }
-                });
-              }
-            }
-
-            if (!response || !response.ok) return null;
-            const buffer = await response.arrayBuffer();
-            await fs.promises.writeFile(filePath, Buffer.from(buffer));
-            return buffer;
-          } catch (err) {
-            console.error("Image cache promise error:", err);
-            return null;
-          }
-        })();
-
-        bufferPromise.finally(() => cacheInFlight.delete(filePath));
-        cacheInFlight.set(filePath, bufferPromise);
-      }
-
-      const buffer = await cacheInFlight.get(filePath);
-      if (!buffer) {
-        const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"><rect width="100%" height="100%" fill="#1a1a24"/><text x="50%" y="50%" fill="#666688" font-family="sans-serif" font-size="14" text-anchor="middle">Нет изображения</text></svg>`;
-        return new Response(fallbackSvg, { headers: { 'Content-Type': 'image/svg+xml' } });
-      }
-      return new Response(buffer, { headers: { 'Content-Type': 'image/jpeg' } });
     }
+
+    let promise = cacheInFlight.get(filePath);
+    if (!promise) {
+      const isBlocked = isBlockedImageDomain(originalUrl);
+      const proxyUrl = getProxyImageUrl(originalUrl);
+
+      promise = (async () => {
+        try {
+          let response = null;
+          const fetchFn = (typeof net !== 'undefined' && net.fetch) ? net.fetch : fetch;
+
+          if (isBlocked) {
+            try {
+              response = await fetchFn(proxyUrl, { headers: { 'User-Agent': UserAgent, 'Referer': 'https://anixart.tv/' } });
+            } catch (e) {}
+            if (!response || !response.ok) {
+              response = await fetchFn(originalUrl, { headers: { 'User-Agent': UserAgent, 'Referer': 'https://anixart.tv/' } });
+            }
+          } else {
+            try {
+              response = await fetchFn(originalUrl, { headers: { 'User-Agent': UserAgent, 'Referer': 'https://anixart.tv/' } });
+            } catch (e) {}
+            if (!response || !response.ok) {
+              response = await fetchFn(proxyUrl, { headers: { 'User-Agent': UserAgent, 'Referer': 'https://anixart.tv/' } });
+            }
+          }
+
+          if (!response || !response.ok) return null;
+          const buffer = await response.arrayBuffer();
+          const nodeBuffer = Buffer.from(buffer);
+          await fs.promises.writeFile(filePath, nodeBuffer);
+          return nodeBuffer;
+        } catch (err) {
+          console.error("Image cache promise error:", err);
+          return null;
+        }
+      })();
+
+      promise.finally(() => cacheInFlight.delete(filePath));
+      cacheInFlight.set(filePath, promise);
+    }
+
+    let buffer = null;
+    try {
+        buffer = await promise;
+    } catch (e) {}
+    if (!buffer) {
+      const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"><rect width="100%" height="100%" fill="#1a1a24"/><text x="50%" y="50%" fill="#666688" font-family="sans-serif" font-size="14" text-anchor="middle">Нет изображения</text></svg>`;
+      return new Response(fallbackSvg, { headers: { 'Content-Type': 'image/svg+xml' } });
+    }
+    return new Response(buffer, { headers: { 'Content-Type': 'image/jpeg' } });
   } catch (e) {
     console.error("Cache protocol error:", e);
     const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"><rect width="100%" height="100%" fill="#1a1a24"/><text x="50%" y="50%" fill="#666688" font-family="sans-serif" font-size="14" text-anchor="middle">Нет изображения</text></svg>`;
@@ -604,7 +598,7 @@ function createWindow() {
         UpsertKeyValue(requestHeaders, 'Referer', url);
       }
 
-      if (!isKodikDomain(host) && host !== "video.sibnet.ru") {
+      if (!isKodikDomain(host) && host !== "video.sibnet.ru" && !host.includes("peerjs") && !host.includes("0.peerjs.com")) {
         UpsertKeyValue(requestHeaders, 'sec-ch-ua-platform', "Android");
         UpsertKeyValue(requestHeaders, 'sec-ch-ua-mobile', "?1");
         UpsertKeyValue(requestHeaders, 'sec-ch-ua', "AnixartApp");
@@ -621,6 +615,16 @@ function createWindow() {
     }
     UpsertKeyValue(responseHeaders, 'Access-Control-Allow-Origin', ['*']);
     UpsertKeyValue(responseHeaders, 'Access-Control-Allow-Headers', ['*']);
+    let host = '';
+    try {
+        host = new URL(url).host;
+    } catch (_) {}
+    if (host.includes("peerjs") || host.includes("0.peerjs.com")) {
+        if (responseHeaders['Cross-Origin-Opener-Policy']) delete responseHeaders['Cross-Origin-Opener-Policy'];
+        if (responseHeaders['cross-origin-opener-policy']) delete responseHeaders['cross-origin-opener-policy'];
+        if (responseHeaders['Cross-Origin-Embedder-Policy']) delete responseHeaders['Cross-Origin-Embedder-Policy'];
+        if (responseHeaders['cross-origin-embedder-policy']) delete responseHeaders['cross-origin-embedder-policy'];
+    }
     callback({
       responseHeaders,
     });

@@ -21,6 +21,12 @@
     import { HotkeyManager } from "../components/stores/hotkeyManager.js";
     import { UpscaleRenderer } from "../components/stores/upscaleRenderer.js";
 
+    // P2P variables
+    let isP2pHost = false;
+    let p2pConnection = null;
+    let isSeeking = false;
+    let lastP2pState = null;
+
     // Manager instances
     let hlsManager = new HlsManager();
     let volumeManager = new VolumeManager();
@@ -626,6 +632,15 @@
         if (rpcManager) {
             rpcManager.setPlaying(episode.name, video?.currentTime, video?.duration);
         }
+
+        if (window.p2pConnection && window.p2pIsHost) {
+            window.p2pConnection.send({
+                type: 'sync_start',
+                release: args.release,
+                episodes: args.episodes,
+                episode: episode
+            });
+        }
     }
 
     async function init() {
@@ -721,10 +736,19 @@
             }
         };
 
+        window.addEventListener('p2p-sync', handleP2pSync);
+
         video.ontimeupdate = () => {
             if (!video || !video.duration) return;
             currentTime = utils.returnFormatedTime(video.currentTime);
             progressPercent = (video.currentTime / video.duration) * 100;
+
+            if (window.p2pConnection && window.p2pIsHost && !isSeeking) {
+                if (Math.floor(video.currentTime) % 5 === 0 && Math.floor(video.currentTime) !== lastP2pState) {
+                     lastP2pState = Math.floor(video.currentTime);
+                     window.p2pConnection.send({ type: 'sync_time', time: video.currentTime });
+                }
+            }
             if (durationTime === "0:00" || durationTime === "00:00") {
                 syncDuration();
             }
@@ -738,6 +762,9 @@
             isPaused = true;
             loading = false;
             if (rpcManager) rpcManager.setPaused(currentEpisode.name);
+            if (window.p2pConnection) {
+                window.p2pConnection.send({ type: 'pause', time: video.currentTime });
+            }
         };
 
         video.onplay = () => {
@@ -745,6 +772,20 @@
             loading = false;
             syncDuration();
             if (rpcManager) rpcManager.setPlaying(currentEpisode.name, video.currentTime, video.duration);
+            if (window.p2pConnection) {
+                window.p2pConnection.send({ type: 'play', time: video.currentTime });
+            }
+        };
+
+        video.onseeking = () => {
+             isSeeking = true;
+        };
+
+        video.onseeked = () => {
+             isSeeking = false;
+             if (window.p2pConnection && window.p2pIsHost) {
+                 window.p2pConnection.send({ type: 'seek', time: video.currentTime });
+             }
         };
 
         // Start loading the stream immediately before non-critical UI awaits
@@ -857,7 +898,23 @@
         }
     }
 
+    function handleP2pSync(e) {
+        if (!video) return;
+        const data = e.detail;
+        if (data.type === 'play' && video.paused) {
+            video.play().catch(e => console.error("P2P Play error:", e));
+        } else if (data.type === 'pause' && !video.paused) {
+            video.pause();
+        } else if (data.type === 'seek' || data.type === 'sync_time') {
+            const timeDiff = Math.abs(video.currentTime - data.time);
+            if (timeDiff > 2) {
+                video.currentTime = data.time;
+            }
+        }
+    }
+
     onDestroy(() => {
+        window.removeEventListener('p2p-sync', handleP2pSync);
         const relId = getReleaseId();
         const ep = currentEpisode || args?.currentEpisode;
         if (video && video.duration && relId && ep) {

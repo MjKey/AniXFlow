@@ -1,0 +1,17 @@
+<<<<<<< SEARCH
+                     updateViewportComponent(Pages.PLAYER, {
+                         release: data.release,
+                         currentEpisode: data.episode,
+                         episodes: data.episodes,
+                         roomId: roomId,
+                         isHost: false
+                     });
+=======
+                     window.updateViewportComponent(Pages.PLAYER, {
+                         release: data.release,
+                         currentEpisode: data.episode,
+                         episodes: data.episodes,
+                         roomId: roomId,
+                         isHost: false
+                     });
+>>>>>>> REPLACE

@@ -559,6 +559,14 @@
 
                         const finalSrc = url ? (url.startsWith('//') ? `https:${url}` : url) : "";
 
+                        if (window.p2pConnection && window.p2pIsHost) {
+                            window.p2pConnection.send({
+                                type: 'sync_start',
+                                release: args,
+                                episodes: i.episodes,
+                                episode: ep
+                            });
+                        }
                         updateViewportComponent(11, {
                             src: finalSrc,
                             currentQuality: resolvedQuality,

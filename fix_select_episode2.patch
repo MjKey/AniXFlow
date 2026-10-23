@@ -1,0 +1,21 @@
+<<<<<<< SEARCH
+                        updateViewportComponent(11, {
+                            release: args,
+                            episodes: i.episodes,
+                            currentEpisode: ep,
+                        });
+=======
+                        if (window.p2pConnection && window.p2pIsHost) {
+                            window.p2pConnection.send({
+                                type: 'sync_start',
+                                release: args,
+                                episodes: i.episodes,
+                                episode: ep
+                            });
+                        }
+                        updateViewportComponent(11, {
+                            release: args,
+                            episodes: i.episodes,
+                            currentEpisode: ep,
+                        });
+>>>>>>> REPLACE

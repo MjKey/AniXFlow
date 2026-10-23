@@ -1,0 +1,75 @@
+<<<<<<< SEARCH
+      if (host.includes('anixart') || host.includes('anixsekai')) {
+        UpsertKeyValue(requestHeaders, 'Referer', null);
+      }
+      UpsertKeyValue(requestHeaders, 'Access-Control-Allow-Origin', ['*']);
+
+      if (host === "video.sibnet.ru") {
+        UpsertKeyValue(requestHeaders, 'Referer', url);
+      }
+
+      if (!isKodikDomain(host) && host !== "video.sibnet.ru" && !host.includes("peerjs")) {
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua-platform', "Android");
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua-mobile', "?1");
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua', "AnixartApp");
+        UpsertKeyValue(requestHeaders, 'User-Agent', UserAgent);
+      }
+      callback({ requestHeaders });
+    },
+  );
+
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    const { responseHeaders, statusCode, url } = details;
+    if (isDebugMode) {
+      sendDebugLog('net', `<- [${statusCode}] ${url}`);
+    }
+    UpsertKeyValue(responseHeaders, 'Access-Control-Allow-Origin', ['*']);
+    UpsertKeyValue(responseHeaders, 'Access-Control-Allow-Headers', ['*']);
+    callback({
+      responseHeaders,
+    });
+  });
+}
+=======
+      if (host.includes('anixart') || host.includes('anixsekai')) {
+        UpsertKeyValue(requestHeaders, 'Referer', null);
+      }
+      UpsertKeyValue(requestHeaders, 'Access-Control-Allow-Origin', ['*']);
+
+      if (host === "video.sibnet.ru") {
+        UpsertKeyValue(requestHeaders, 'Referer', url);
+      }
+
+      if (!isKodikDomain(host) && host !== "video.sibnet.ru" && !host.includes("peerjs") && !host.includes("0.peerjs.com")) {
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua-platform', "Android");
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua-mobile', "?1");
+        UpsertKeyValue(requestHeaders, 'sec-ch-ua', "AnixartApp");
+        UpsertKeyValue(requestHeaders, 'User-Agent', UserAgent);
+      }
+      callback({ requestHeaders });
+    },
+  );
+
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    const { responseHeaders, statusCode, url } = details;
+    if (isDebugMode) {
+      sendDebugLog('net', `<- [${statusCode}] ${url}`);
+    }
+    UpsertKeyValue(responseHeaders, 'Access-Control-Allow-Origin', ['*']);
+    UpsertKeyValue(responseHeaders, 'Access-Control-Allow-Headers', ['*']);
+    let host = '';
+    try {
+        host = new URL(url).host;
+    } catch (_) {}
+    if (host.includes("peerjs") || host.includes("0.peerjs.com")) {
+        if (responseHeaders['Cross-Origin-Opener-Policy']) delete responseHeaders['Cross-Origin-Opener-Policy'];
+        if (responseHeaders['cross-origin-opener-policy']) delete responseHeaders['cross-origin-opener-policy'];
+        if (responseHeaders['Cross-Origin-Embedder-Policy']) delete responseHeaders['Cross-Origin-Embedder-Policy'];
+        if (responseHeaders['cross-origin-embedder-policy']) delete responseHeaders['cross-origin-embedder-policy'];
+    }
+    callback({
+      responseHeaders,
+    });
+  });
+}
+>>>>>>> REPLACE

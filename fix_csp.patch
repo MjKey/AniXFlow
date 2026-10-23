@@ -1,0 +1,11 @@
+<<<<<<< SEARCH
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'anixflow', privileges: { secure: true, standard: true, supportFetchAPI: true, bypassCSP: true, stream: true } },
+  { scheme: 'anixflow-cache', privileges: { secure: true, standard: true, supportFetchAPI: true, bypassCSP: true } }
+]);
+=======
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'anixflow', privileges: { secure: true, standard: true, supportFetchAPI: true, bypassCSP: true, stream: true } },
+  { scheme: 'anixflow-cache', privileges: { secure: true, standard: true, supportFetchAPI: true, bypassCSP: true } }
+]);
+>>>>>>> REPLACE
